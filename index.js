@@ -1,37 +1,45 @@
-const puppeteer = require('puppeteer-core');
-
-// O nome do seu serviço de Chromium é 'chromium'.
-const CHROMIUM_HOST = 'chromium';
+const puppeteer = require('puppeteer');
 
 async function autoClicker() {
-  console.log(`Tentando conectar ao serviço '${CHROMIUM_HOST}' na porta 9222...`);
-  const browserURL = `http://${CHROMIUM_HOST}:9222`;
-
+  console.log('Iniciando o navegador invisível...');
+  let browser;
   try {
-    const browser = await puppeteer.connect({ browserURL, timeout: 60000 }); // Aumenta o tempo de espera para 60s
-    const page = (await browser.pages())[0];
+    // Inicia uma instância do navegador que vem junto com o Puppeteer
+    browser = await puppeteer.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--window-size=1920,1080' // Define um tamanho de janela para a página carregar corretamente
+      ]
+    });
 
-    if (!page) {
-        console.error("Nenhuma aba encontrada no Chromium. O navegador pode estar iniciando ou sem abas abertas.");
-        browser.disconnect();
-        setTimeout(autoClicker, 60 * 1000); // Tenta de novo em 1 minuto
-        return;
-    }
+    const page = await browser.newPage();
+    console.log('Navegador iniciado.');
 
-    console.log('Conexão bem-sucedida! Iniciando cliques a cada 1 minuto.');
-
+    // O loop que vai rodar a cada minuto
     setInterval(async () => {
       try {
+        // Acessa a URL pública do seu outro container, como um usuário normal
+        console.log('Navegando para https://projetoagenda-chromium.egraeo.easypanel.host/ ...');
+        await page.goto('https://projetoagenda-chromium.egraeo.easypanel.host/');
+
+        // Espera 5 segundos para garantir que tudo na página carregou
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
         console.log(`[${new Date().toLocaleTimeString()}] Clicando em (1026, 458)...`);
         await page.mouse.click(1026, 458);
+        console.log('Clique realizado com sucesso.');
+
       } catch (e) {
-        console.error('Erro durante o clique:', e.message);
+        console.error('Erro durante a navegação ou clique:', e.message);
       }
-    }, 60 * 1000); // 1 minuto
+    }, 60 * 1000); // 60 segundos = 1 minuto
 
   } catch (e) {
-    console.error(`Falha ao conectar: ${e.message}. Verifique os logs e as configurações do serviço '${CHROMIUM_HOST}'. Tentando novamente em 1 minuto...`);
-    setTimeout(autoClicker, 60 * 1000); // Tenta de novo em 1 minuto
+    console.error('Erro fatal ao iniciar o navegador:', e.message);
+    if (browser) await browser.close();
+    // Se falhar, tenta reiniciar em 1 minuto
+    setTimeout(autoClicker, 60 * 1000);
   }
 }
 
