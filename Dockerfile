@@ -1,17 +1,17 @@
-# Usar a imagem oficial e estável do Node.js v20
-FROM node:20-slim
+# Usar a imagem oficial do Puppeteer que já vem com o Chrome
+FROM ghcr.io/puppeteer/puppeteer:22.10.0
 
-# Criar e definir o diretório de trabalho dentro do container
+# Mudar para o diretório de trabalho
 WORKDIR /app
 
-# Copiar o package.json para o diretório de trabalho
-COPY package.json .
+# Copiar os arquivos de definição do projeto
+COPY package*.json ./
 
-# Rodar o comando para instalar as dependências
+# Instalar as dependências
 RUN npm install
 
-# Copiar o resto do código da sua aplicação
+# Copiar o resto do código
 COPY . .
 
-# Definir o comando para iniciar a aplicação
+# Definir o comando para iniciar o script
 CMD ["node", "index.js"]
