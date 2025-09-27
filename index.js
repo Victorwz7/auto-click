@@ -4,8 +4,8 @@ const puppeteer = require('puppeteer');
 const targetUrl = 'https://chat-oliveiradrops-chromium.n0rb5w.easypanel.host/';
 
 // As coordenadas do clique
-const clickX = 1026;
-const clickY = 458;
+const clickX = 371;
+const clickY = 426;
 
 async function autoClicker() {
   console.log('Iniciando o robô de clique...');
